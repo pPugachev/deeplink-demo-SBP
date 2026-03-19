@@ -11,9 +11,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val button = findViewById<Button>(R.id.button)
-        button.setOnClickListener {
+        val btnRaif = findViewById<Button>(R.id.btn_raif)
+        val btnNspk = findViewById<Button>(R.id.btn_nspk)
+
+        btnRaif.setOnClickListener {
             startActivity(Intent(this, WebViewActivity::class.java))
+        }
+
+        btnNspk.setOnClickListener {
+            startActivity(Intent(this, BankListActivity::class.java))
         }
     }
 }

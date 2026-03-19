@@ -13,20 +13,19 @@ import androidx.appcompat.app.AppCompatActivity
 class WebViewActivity : AppCompatActivity() {
 
     companion object {
-        private const val BASE_URL = "https://pay.raif.ru/pay/demo.html"
+        const val EXTRA_URL = "extra_url"
+        private const val BASE_URL = "https://pay.raif.ru/pay?publicId=000002100000101-00000101&amount=10&paymentMethod=ONLY_SBP"
         private const val TAG = "WebViewDebug"
     }
-
-    private lateinit var webView: WebView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
 
-        webView = findViewById(R.id.webview)
+        val webView = findViewById<WebView>(R.id.webview)
         webView.settings.apply {
             javaScriptEnabled = true
-            setSupportMultipleWindows(false) // отключаем попапы
+            setSupportMultipleWindows(false)
             domStorageEnabled = true
         }
 
@@ -35,24 +34,41 @@ class WebViewActivity : AppCompatActivity() {
                 val url = request.url.toString()
                 Log.d(TAG, "shouldOverrideUrlLoading: $url")
 
-                // Если это не http/https, пытаемся открыть как Intent
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
                     return try {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        startActivity(intent) // запускаем внешнее приложение
+                        startActivity(intent)
                         Log.d(TAG, "Запущено внешнее приложение для URI: $url")
-                        true // предотвращаем загрузку в WebView
+                        true
                     } catch (e: Exception) {
                         Log.e(TAG, "Ошибка запуска внешнего приложения", e)
                         Toast.makeText(this@WebViewActivity, "Не удалось открыть ссылку: ${e.message}", Toast.LENGTH_SHORT).show()
-                        true // всё равно не загружаем в WebView, чтобы избежать ошибки
+                        true
                     }
                 }
-                // Для http/https разрешаем WebView загрузить
                 return false
             }
         }
 
-        webView.loadUrl(BASE_URL)
+        val url = intent.getStringExtra(EXTRA_URL) ?: BASE_URL
+        Log.d(TAG, "Загружаем URL: $url")
+
+        // Проверяем, не является ли переданный URL deeplink
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            // Это deeplink – пытаемся открыть сразу, без загрузки в WebView
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+                Log.d(TAG, "Запущено внешнее приложение для начального URL: $url")
+                finish() // закрываем активность, она не нужна
+            } catch (e: Exception) {
+                Log.e(TAG, "Не удалось открыть deeplink: $url", e)
+                Toast.makeText(this, "Приложение для обработки ссылки не найдено", Toast.LENGTH_LONG).show()
+                finish()
+            }
+        } else {
+            // Обычный http/https – загружаем в WebView
+            webView.loadUrl(url)
+        }
     }
 }

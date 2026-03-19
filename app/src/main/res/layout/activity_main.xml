@@ -8,8 +8,15 @@
     android:padding="16dp">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btn_raif"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Открыть WebView"/>
+        android:text="Raif Demo"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btn_nspk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="API виджета НСПК"/>
 </LinearLayout>
